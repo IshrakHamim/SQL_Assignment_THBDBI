@@ -146,7 +146,7 @@ WHERE (
       );
 
 PROMPT =====================
-PROMPT Running QUESTION 17 (problem)
+PROMPT Running QUESTION 17 
 PROMPT =====================
 
 SELECT DISTINCT product.product_id, product.product_name
@@ -165,6 +165,17 @@ PROMPT =====================
 PROMPT Running QUESTION 18
 PROMPT =====================
 
+SELECT DISTINCT author_id
+FROM views
+WHERE author_id IN (SELECT viewer_id
+                       FROM views)
+ORDER BY author_id;
+
+PROMPT =====================
+PROMPT Running QUESTION 19 (problem)
+PROMPT =====================
+
+SELECT ROUND( COUNT(delivery_id)/COUNT( SELECT delivery_id FROM delivery WHERE order_date = customer_pref_delivery_date), 2) AS immediate_percentage;
 
 
 
