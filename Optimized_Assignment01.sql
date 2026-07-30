@@ -149,17 +149,13 @@ PROMPT =====================
 PROMPT Running QUESTION 17 (problem)
 PROMPT =====================
 
-SELECT DISTINCT product.product_id, product.product_name
-FROM product
-JOIN sales x
-  ON product.product_id = x.product_id 
-WHERE x.sale_date >= DATE '2019-01-01' AND x.sale_date <= DATE '2019-03-31'
- AND  DATE '2019-01-01' <= ALL (SELECT sale_date
-                                FROM sales y
-                                WHERE y.product_id = product.product_id)
- AND DATE '2019-03-31' >= ALL (SELECT sale_date
-                                FROM sales y
-                                WHERE y.product_id = product.product_id);
+SELECT p.product_id, p.product_name
+FROM product p
+JOIN sales s
+  ON p.product_id = s.product_id
+GROUP BY p.product_id, p.product_name
+HAVING MIN(s.sale_date) >= DATE '2019-01-01'
+   AND MAX(s.sale_date) <= DATE '2019-03-31';
 
 PROMPT =====================
 PROMPT Running QUESTION 18
