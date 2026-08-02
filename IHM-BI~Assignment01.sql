@@ -172,11 +172,20 @@ WHERE author_id IN (SELECT viewer_id
 ORDER BY author_id;
 
 PROMPT =====================
-PROMPT Running QUESTION 19 (problem)
+PROMPT Running QUESTION 19 
 PROMPT =====================
 
-SELECT ROUND( COUNT(delivery_id)/COUNT( SELECT delivery_id FROM delivery WHERE order_date = customer_pref_delivery_date), 2) AS immediate_percentage;
+SELECT 
+  ROUND(
+    100 * COUNT(CASE WHEN order_date = customer_pref_delivery_date THEN 1 END)
+    / COUNT(delivery_id),
+    2
+) AS immediate_percentage
+FROM delivery;
 
+PROMPT =====================
+PROMPT Running QUESTION 20 
+PROMPT =====================
 
 
 
