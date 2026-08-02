@@ -217,7 +217,8 @@ SELECT c.country_name,
 FROM Countries c 
 JOIN Weather w 
   ON c.country_id = w.country_id 
-WHERE day LIKE '%-NOV-%'
+WHERE w.day >= DATE '2019-11-01' 
+  AND w.day <= DATE '2019-11-30'
 GROUP BY c.country_id, c.country_name;
 
 
