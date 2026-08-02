@@ -187,6 +187,45 @@ PROMPT =====================
 PROMPT Running QUESTION 20 
 PROMPT =====================
 
+SELECT ad_id, 
+           CASE 
+                     WHEN COUNT( CASE WHEN action in ('Clicked', 'Viewed') THEN 1 END)= 0 THEN 0 
+                     ELSE 
+                         ROUND(
+                                100* COUNT( CASE WHEN action = 'Clicked' THEN 1 END)
+                                 / COUNT( CASE WHEN action IN ('Clicked', 'Viewed') THEN 1 END), 
+                                  2
+                                 )
+             END AS ctr
+FROM Ads 
+GROUP BY ad_id
+ORDER BY ctr DESC, ad_id ASC;
+
+PROMPT =====================
+PROMPT Running QUESTION 21 
+PROMPT =====================
+
+SELECT * 
+FROM Employee;
+
+PROMPT =====================
+PROMPT Running QUESTION 22 
+PROMPT =====================
+
+SELECT c.country_name,
+                      CASE 
+                            WHEN AVG(weather_state) <= 15 THEN 'Cold' 
+                            WHEN AVG(weather_state) >= 25 THEN 'Hot' 
+                            ELSE 'Warm' 
+                      END  AS Weather_type
+FROM Countries c 
+JOIN Weather w 
+  ON c.country_id = w.country_id 
+WHERE day LIKE '%-NOV-%'
+GROUP BY c.country_id, c.country_name;
+
+
+
 
 
 
