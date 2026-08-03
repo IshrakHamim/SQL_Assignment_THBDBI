@@ -224,7 +224,16 @@ JOIN Weather w
 WHERE day LIKE '%-NOV-%'
 GROUP BY c.country_id, c.country_name;
 
+PROMPT =====================
+PROMPT Running QUESTION 23 
+PROMPT =====================
 
+SELECT DISTINCT p.product_id, p.start_date, p.end_date, u.purchase_date,  p.price, u.units
+FROM units_sold u
+JOIN prices p
+  ON u.product_id = p.product_id
+WHERE u.purchase_date >= p.start_date
+  AND u.purchase_date <= p.end_date;
 
 
 
