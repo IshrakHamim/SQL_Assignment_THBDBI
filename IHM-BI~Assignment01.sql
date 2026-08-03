@@ -228,12 +228,159 @@ PROMPT =====================
 PROMPT Running QUESTION 23 
 PROMPT =====================
 
-SELECT DISTINCT p.product_id, p.start_date, p.end_date, u.purchase_date,  p.price, u.units
+SELECT p.product_id,
+       ROUND( 
+             SUM(u.units * p.price)*1.0 / SUM(u.units) ,
+             2
+             ) AS average_price
 FROM units_sold u
 JOIN prices p
   ON u.product_id = p.product_id
 WHERE u.purchase_date >= p.start_date
-  AND u.purchase_date <= p.end_date;
+  AND u.purchase_date <= p.end_date
+GROUP BY p.product_id;
+
+PROMPT =====================
+PROMPT Running QUESTION 24 
+PROMPT =====================
+
+SELECT player_id, 
+       event_date AS first_event
+FROM activity x
+WHERE event_date <= ALL( 
+                         SELECT event_date 
+                         FROM activity y 
+                         WHERE x.player_id = y.player_id);
+
+PROMPT =====================
+PROMPT Running QUESTION 25 
+PROMPT =====================
+
+SELECT player_id, 
+       device_id
+FROM activity x
+WHERE event_date <= ALL( 
+                         SELECT event_date 
+                         FROM activity y 
+                         WHERE x.player_id = y.player_id);
+
+
+PROMPT =====================
+PROMPT Running QUESTION 26 
+PROMPT =====================
+
+SELECT p.product_name, p.product_category, o.product_id, SUM(o.unit) AS total_units
+FROM products p
+JOIN orders o 
+  ON p.product_id = o.product_id 
+WHERE o.order_date >= DATE '2020-02-01' 
+  AND o.order_date <= DATE '2020-02-29'
+GROUP BY o.product_id, p.product_name, p.product_category
+HAVING SUM(o.unit) >= 100;
+
+
+PROMPT =====================
+PROMPT Running QUESTION 27 
+PROMPT =====================
+
+SELECT * 
+FROM users
+WHERE mail LIKE '%@leetcode.com';
+
+
+PROMPT =====================
+PROMPT Running QUESTION 28
+PROMPT =====================
+
+SELECT c.customer_id, c.name
+FROM customers c
+JOIN orders_28 o 
+  ON o.customer_id = c.customer_id 
+JOIN products_28 p 
+  ON p.product_id = o.product_id
+WHERE ( o.order_date >= DATE '2020-06-01' AND o.order_date <= DATE '2020-07-31' )
+GROUP BY c.customer_id, c.name
+HAVING 
+   SUM ( CASE 
+             WHEN o.order_date >= DATE '2020-06-01' AND o.order_date <= DATE '2020-06-30'
+             THEN o.quantity * p.price
+             ELSE 0
+        END) >= 100
+AND 
+   SUM( CASE 
+             WHEN o.order_date >= DATE '2020-07-01' AND o.order_date <= DATE '2020-07-31'
+             THEN o.quantity * p.price
+             ELSE 0
+        END) >= 100
+ORDER BY c.customer_id;  
+
+PROMPT =====================
+PROMPT Running QUESTION 29
+PROMPT =====================
+
+SELECT c.title
+FROM tv_program t
+JOIN content c
+  ON t.content_id = c.content_id 
+WHERE c.content_type = 'Movies' 
+  AND c.kids_content = 'Y'
+  AND t.program_date >= DATE '2020-06-01' 
+  AND t.program_date <= DATE '2020-06-30';
+
+
+PROMPT =====================
+PROMPT Running QUESTION 30
+PROMPT =====================
+
+SELECT n.id , n.year,  NVL(n.npv, 0) AS npv
+FROM queries q  
+LEFT JOIN npv n
+  ON n.id = q.id AND n.year = q.year
+ORDER BY q.id, q.year;
+             
+PROMPT =====================
+PROMPT Running QUESTION 31
+PROMPT =====================
+
+SELECT n.id , n.year,  NVL(n.npv, 0) AS npv
+FROM queries q  
+LEFT JOIN npv n
+  ON n.id = q.id AND n.year = q.year
+ORDER BY q.id, q.year;
+
+PROMPT =====================
+PROMPT Running QUESTION 32
+PROMPT =====================
+
+SELECT u.unique_id, e.name 
+FROM employees e
+LEFT JOIN employee_uni u 
+   ON u.id = e.id;
+
+PROMPT =====================
+PROMPT Running QUESTION 33 (PROBLEM) 
+PROMPT =====================
+
+SELECT * FROM users;
+SELECT * FROM rides;
+
+SELECT  u.name, NVL(SUM(r.distance), 0) AS travelled_distance
+FROM users u
+LEFT JOIN rides r
+  ON u.user_id = r.user_id 
+GROUP BY u.id, u.name;
+ORDER BY r.distance DESC, u.name ASC;
+
+
+
+
+
+
+
+
+
+
+
 
 
 
