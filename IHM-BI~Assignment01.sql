@@ -419,6 +419,109 @@ UNION ALL
   FETCH FIRST 1 ROWS ONLY 
 );
  
+PROMPT =====================
+PROMPT Running QUESTION 36 
+PROMPT =====================
+
+SELECT 
+      u.name,
+      NVL(SUM(r.distance), 0) AS travelled_distance 
+FROM Users u
+LEFT JOIN Rides r
+  ON u.user_id = r.user_id 
+GROUP BY 
+     u.user_id,
+     u.name
+ORDER BY
+     travelled_distance DESC,
+     u.name ASC;
+
+PROMPT =====================
+PROMPT Running QUESTION 37
+PROMPT =====================
+
+SELECT u.unique_id, e.name 
+FROM employees e
+LEFT JOIN employee_uni u 
+   ON u.id = e.id;
+   
+
+PROMPT =====================
+PROMPT Running QUESTION 38
+PROMPT =====================
+
+SELECT * FROM students;
+SELECT * FROM departments;
+
+SELECT id, name
+FROM students
+WHERE department_id NOT IN (SELECT id FROM departments);
+
+PROMPT =====================
+PROMPT Running QUESTION 39
+PROMPT =====================
+
+SELECT * FROM calls;
+
+SELECT 
+    LEAST(from_id, to_id) AS person1,
+    GREATEST(from_id, to_id) AS person2,
+    COUNT(*) AS call_count,
+    SUM(duration) AS total_duration
+FROM Calls
+GROUP BY 
+    LEAST(from_id, to_id), 
+    GREATEST(from_id, to_id);
+
+
+PROMPT =====================
+PROMPT Running QUESTION 40
+PROMPT =====================
+
+SELECT p.product_id,
+       ROUND( 
+             SUM(u.units * p.price)*1.0 / SUM(u.units) ,
+             2
+             ) AS average_price
+FROM units_sold u
+JOIN prices p
+  ON u.product_id = p.product_id
+WHERE u.purchase_date >= p.start_date
+  AND u.purchase_date <= p.end_date
+GROUP BY p.product_id;
+
+PROMPT =====================
+PROMPT Running QUESTION 41
+PROMPT =====================
+
+SELECT w.name, SUM(width*length*height*units) AS volume
+FROM warehouse w
+JOIN products_41 p
+  ON w.product_id = p.product_id
+GROUP BY w.name
+ORDER BY w.name;
+
+PROMPT =====================
+PROMPT Running QUESTION 42 (problem)
+PROMPT =====================
+
+SELECT * FROM sales_42;
+
+SELECT sale_date, SUM(CASE WHEN fruit = 'apples' THEN sold_num ELSE -soldnum END) AS diff
+FROM sales_42
+GROUP BY sale_date;
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
