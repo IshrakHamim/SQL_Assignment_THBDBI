@@ -358,32 +358,67 @@ LEFT JOIN employee_uni u
    ON u.id = e.id;
 
 PROMPT =====================
-PROMPT Running QUESTION 33 (PROBLEM) 
+PROMPT Running QUESTION 33 
 PROMPT =====================
 
-SELECT * FROM users;
-SELECT * FROM rides;
 
-SELECT  u.name, NVL(SUM(r.distance), 0) AS travelled_distance
-FROM users u
-LEFT JOIN rides r
+SELECT 
+      u.name,
+      NVL(SUM(r.distance), 0) AS travelled_distance 
+FROM Users u
+LEFT JOIN Rides r
   ON u.user_id = r.user_id 
-GROUP BY u.id, u.name;
-ORDER BY r.distance DESC, u.name ASC;
+GROUP BY 
+     u.user_id,
+     u.name
+ORDER BY
+     travelled_distance DESC,
+     u.name ASC;
 
 
+PROMPT =====================
+PROMPT Running QUESTION 34 
+PROMPT =====================
+
+SELECT p.product_name, SUM(o.unit) AS total_orders
+FROM orders_34 o
+JOIN products_34 p
+  ON p.product_id = o.product_id 
+WHERE o.order_date >= DATE '2020-02-01' 
+  AND o.order_date <= DATE '2020-02-29'
+GROUP BY p.product_name
+HAVING SUM(o.unit) >= 100;
 
 
+PROMPT =====================
+PROMPT Running QUESTION 35 
+PROMPT =====================
 
+--SELECT * FROM movies;
+--SELECT * FROM users;
+--SELECT * FROM Movie_Rating;
 
-
-
-
-
-
-
-
-
+( 
+  SELECT u.name AS results
+  FROM movie_rating mr
+  JOIN userS u ON mr.user_id = u.user_id
+  GROUP BY u.user_id, u.name 
+  ORDER BY COUNT(*) DESC, u.name ASC
+  FETCH FIRST 1 ROWS ONLY 
+)
+UNION ALL
+( 
+  SELECT m.title AS results
+  FROM movie_rating mr
+  JOIN movies m
+    ON mr.movie_id = m.movie_id
+  WHERE mr.created_at >= DATE '2020-02-01'
+    AND mr.created_at < DATE '2020-03-01'
+  GROUP BY m.movie_id, m.title
+  ORDER BY AVG(mr.rating) DESC, m.title ASC
+  FETCH FIRST 1 ROWS ONLY 
+);
+ 
 
 
 
