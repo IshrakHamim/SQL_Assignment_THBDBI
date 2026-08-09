@@ -149,13 +149,17 @@ PROMPT =====================
 PROMPT Running QUESTION 17 
 PROMPT =====================
 
-SELECT p.product_id, p.product_name
-FROM product p
-JOIN sales s
-  ON p.product_id = s.product_id
-GROUP BY p.product_id, p.product_name
-HAVING MIN(s.sale_date) >= DATE '2019-01-01'
-   AND MAX(s.sale_date) <= DATE '2019-03-31';
+SELECT DISTINCT product.product_id, product.product_name
+FROM product
+JOIN sales x
+  ON product.product_id = x.product_id 
+WHERE x.sale_date >= DATE '2019-01-01' AND x.sale_date <= DATE '2019-03-31'
+ AND  DATE '2019-01-01' <= ALL (SELECT sale_date
+                                FROM sales y
+                                WHERE y.product_id = product.product_id)
+ AND DATE '2019-03-31' >= ALL (SELECT sale_date
+                                FROM sales y
+                                WHERE y.product_id = product.product_id);
 
 PROMPT =====================
 PROMPT Running QUESTION 18
@@ -217,8 +221,7 @@ SELECT c.country_name,
 FROM Countries c 
 JOIN Weather w 
   ON c.country_id = w.country_id 
-WHERE w.day >= DATE '2019-11-01' 
-  AND w.day <= DATE '2019-11-30'
+WHERE day LIKE '%-NOV-%'
 GROUP BY c.country_id, c.country_name;
 
 PROMPT =====================
@@ -499,21 +502,16 @@ GROUP BY w.name
 ORDER BY w.name;
 
 PROMPT =====================
-PROMPT Running QUESTION 42 
+PROMPT Running QUESTION 42
 PROMPT =====================
 
-SELECT 
-    a.sale_date,
-    (a.sold_num - o.sold_num) AS diff
-FROM Sales_42 a
-JOIN Sales_42 o 
-  ON a.sale_date = o.sale_date
-WHERE a.fruit = 'apples' 
-  AND o.fruit = 'oranges'
-ORDER BY a.sale_date;
+SELECT sale_date, SUM(CASE WHEN fruit = 'apples' THEN sold_num ELSE -sold_num END) AS diff
+FROM sales_42
+GROUP BY sale_date;
 
-
-
+PROMPT =====================
+PROMPT Running QUESTION 43
+PROMPT =====================
 
 
 
