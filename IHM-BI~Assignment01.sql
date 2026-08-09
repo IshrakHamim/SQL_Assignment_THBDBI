@@ -502,20 +502,29 @@ GROUP BY w.name
 ORDER BY w.name;
 
 PROMPT =====================
-PROMPT Running QUESTION 42 (problem)
+PROMPT Running QUESTION 42
 PROMPT =====================
 
-SELECT * FROM sales_42;
-
-SELECT sale_date, SUM(CASE WHEN fruit = 'apples' THEN sold_num ELSE -soldnum END) AS diff
+SELECT sale_date, SUM(CASE WHEN fruit = 'apples' THEN sold_num ELSE -sold_num END) AS diff
 FROM sales_42
 GROUP BY sale_date;
 
+PROMPT =====================
+PROMPT Running QUESTION 43
+PROMPT =====================
+
+SELECT * FROM activity;
+
+SELECT ROUND( COUNT( DISTINCT player_id WHERE  / (COUNT(DISTINCT player_id) , 2) A fraction;
+
+PROMPT =====================
+PROMPT Running QUESTION 44
+PROMPT =====================
 
 
-
-
-
+PROMPT =====================
+PROMPT Running QUESTION 45
+PROMPT =====================
 
 
 
