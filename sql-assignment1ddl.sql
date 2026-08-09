@@ -1362,7 +1362,7 @@ INSERT INTO project VALUES(1, 3);
 INSERT INTO project VALUES(2, 1);
 INSERT INTO project VALUES(2, 4);
 
-INSERT INTO employee_47 VALUES(11, 'Khaled', 3);
+INSERT INTO employee_47 VALUES(1, 'Khaled', 3);
 INSERT INTO employee_47 VALUES(2, 'Ali', 2);
 INSERT INTO employee_47 VALUES(3, 'John', 3);
 INSERT INTO employee_47 VALUES(4, 'Doe', 2);

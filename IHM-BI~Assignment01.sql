@@ -515,16 +515,78 @@ PROMPT =====================
 
 SELECT * FROM activity;
 
-SELECT ROUND( COUNT( DISTINCT player_id WHERE  / (COUNT(DISTINCT player_id) , 2) A fraction;
+WITH FirstLogins AS (
+    SELECT player_id, MIN(event_date) AS first_date
+    FROM Activity
+    GROUP BY player_id
+),
+NextDayLogins AS (
+    SELECT COUNT(a.player_id) AS cnt
+    FROM FirstLogins fl
+    JOIN Activity a 
+      ON fl.player_id = a.player_id 
+     AND a.event_date = fl.first_date + 1
+),
+TotalPlayers AS (
+    SELECT COUNT(DISTINCT player_id) AS cnt
+    FROM Activity
+)
+SELECT 
+    ROUND(n.cnt * 1.0 / t.cnt, 2) AS fraction
+FROM NextDayLogins n, TotalPlayers t;
 
 PROMPT =====================
 PROMPT Running QUESTION 44
 PROMPT =====================
 
+SELECT name 
+FROM employee_44
+WHERE id IN ( SELECT manager_Id
+              FROM employee_44 
+              GROUP BY manager_Id
+              HAVING COUNT(*) >= 5
+              );
 
 PROMPT =====================
 PROMPT Running QUESTION 45
 PROMPT =====================
+
+SELECT d.dept_id, d.dept_name, NVL(count(s.student_name), 0) as student_number
+FROM department_45 d
+LEFT JOIN student_45 s
+  ON d.dept_id = s.dept_id
+GROUP BY d.dept_id, d.dept_name;
+
+PROMPT =====================
+PROMPT Running QUESTION 46
+PROMPT =====================
+
+SELECT customer_id
+FROM customer
+GROUP BY customer_id
+HAVING COUNT(product_key) = (SELECT COUNT(product_key) FROM product_46);
+
+PROMPT =====================
+PROMPT Running QUESTION 47
+PROMPT =====================
+
+SELECT * FROM project;
+SELECT * FROM employee_47;
+
+WITH CombinedTable AS (
+SELECT p.project_id, p.employee_id, e.name, e.experience_years
+FROM project p
+JOIN employee_47 e
+  ON p.employee_id = e.employee_id
+)
+
+SELECT * 
+FROM CombinedTable x
+WHERE experience_years >= ALL(SELECT experience_years FROM CombinedTable y WHERE x.project_id = y.project_id);
+
+
+
+
 
 
 
