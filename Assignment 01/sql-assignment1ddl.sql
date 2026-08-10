@@ -1469,6 +1469,44 @@ INSERT INTO orders_28 VALUES(6, 3, 20, to_date('2020-06-24','YYYY-MM-DD'), 2);
 INSERT INTO orders_28 VALUES(7, 3, 30, to_date('2020-06-25','YYYY-MM-DD'), 2);
 INSERT INTO orders_28 VALUES(9, 3, 30, to_date('2020-05-08','YYYY-MM-DD'), 3);
 
+-- Drop statements for Q48
+DROP TABLE orders_48 CASCADE CONSTRAINTS;
+DROP TABLE books_48 CASCADE CONSTRAINTS;
+
+-- Create Books table
+CREATE TABLE books_48 (
+    book_id INT PRIMARY KEY,
+    name VARCHAR2(50),
+    available_from DATE
+);
+
+-- Create Orders table
+CREATE TABLE orders_48 (
+    order_id INT PRIMARY KEY,
+    book_id INT,
+    quantity INT,
+    dispatch_date DATE,
+    CONSTRAINT fk_books_48 FOREIGN KEY (book_id) REFERENCES books_48(book_id)
+);
+
+-- Insert Books data
+INSERT INTO books_48 VALUES (1, 'Kalila And Demna', TO_DATE('2010-01-01', 'YYYY-MM-DD'));
+INSERT INTO books_48 VALUES (2, '28 Letters', TO_DATE('2012-05-12', 'YYYY-MM-DD'));
+INSERT INTO books_48 VALUES (3, 'The Hobbit', TO_DATE('2019-06-10', 'YYYY-MM-DD'));
+INSERT INTO books_48 VALUES (4, '13 Reasons Why', TO_DATE('2019-06-01', 'YYYY-MM-DD'));
+INSERT INTO books_48 VALUES (5, 'The Hunger Games', TO_DATE('2008-09-21', 'YYYY-MM-DD'));
+
+-- Insert Orders data
+INSERT INTO orders_48 VALUES (1, 1, 2, TO_DATE('2018-07-26', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (2, 1, 1, TO_DATE('2018-11-05', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (3, 3, 8, TO_DATE('2019-06-11', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (4, 4, 6, TO_DATE('2019-06-05', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (5, 4, 5, TO_DATE('2019-06-20', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (6, 5, 9, TO_DATE('2019-02-02', 'YYYY-MM-DD'));
+INSERT INTO orders_48 VALUES (7, 5, 8, TO_DATE('2010-04-13', 'YYYY-MM-DD'));
+
+COMMIT;
+
 
 commit;
 
