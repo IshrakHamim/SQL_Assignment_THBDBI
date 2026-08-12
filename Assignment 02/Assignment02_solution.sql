@@ -477,10 +477,167 @@ PROMPT =====================
 PROMPT Running QUESTION 81
 PROMPT =====================
 
+SELECT * FROM inventory_q81;
 
+WITH Summary AS (
+    SELECT 
+        item_type,
+        SUM(square_footage) AS total_sqft,
+        COUNT(*) AS item_count
+    FROM inventory_Q81
+    GROUP BY item_type
+),
+PrimeCalc AS (
+    SELECT 
+        item_type,
+        item_count,
+        total_sqft,
+        TRUNC(500000 / total_sqft) AS prime_batches,
+        TRUNC(500000 / total_sqft) * item_count AS prime_item_count,
+        500000 - (TRUNC(500000 / total_sqft) * total_sqft) AS remaining_sqft
+    FROM Summary
+    WHERE item_type = 'prime_eligible'
+),
+NonPrimeCalc AS (
+    SELECT 
+        s.item_type,
+        TRUNC(p.remaining_sqft / s.total_sqft) * s.item_count AS item_count
+    FROM Summary s
+    CROSS JOIN PrimeCalc p
+    WHERE s.item_type = 'not_prime'
+)
+SELECT item_type, prime_item_count AS item_count FROM PrimeCalc
+UNION ALL
+SELECT item_type, item_count FROM NonPrimeCalc;
 
 PROMPT =====================
 PROMPT Running QUESTION 82
 PROMPT =====================
 
+SELECT 
+    EXTRACT(MONTH FROM curr.event_date) AS month,
+    COUNT(DISTINCT curr.user_id) AS monthly_active_users
+FROM user_actions_Q82 curr
+WHERE EXTRACT(MONTH FROM curr.event_date) = 7
+  AND EXTRACT(YEAR FROM curr.event_date) = 2022
+  AND curr.event_type IN ('sign-in', 'like', 'comment')
+  AND EXISTS (
+      SELECT 1 
+      FROM user_actions_Q82 prev
+      WHERE prev.user_id = curr.user_id
+        AND EXTRACT(MONTH FROM prev.event_date) = 6
+        AND EXTRACT(YEAR FROM prev.event_date) = 2022
+        AND prev.event_type IN ('sign-in', 'like', 'comment')
+  )
+GROUP BY EXTRACT(MONTH FROM curr.event_date);
 
+
+PROMPT =====================
+PROMPT Running QUESTION 83
+PROMPT =====================
+
+SELECT * FROM search_frequency_q83;
+WITH SearchExpanded AS (
+    SELECT searches
+    FROM search_frequency_Q83
+    CONNECT BY PRIOR searches = searches
+           AND PRIOR SYS_GUID() IS NOT NULL
+           AND LEVEL <= num_users
+)
+SELECT 
+    ROUND(MEDIAN(searches), 1) AS median
+FROM SearchExpanded;
+
+PROMPT =====================
+PROMPT Running QUESTION 84
+PROMPT =====================
+
+SELECT SUBSTR(user_id, 1, 20) AS user_id, status 
+FROM advertiser_q84;
+
+SELECT SUBSTR(user_id, 1, 20) AS user_id, paid
+FROM daily_pay_Q84;
+
+SELECT 
+    a.user_id,
+    CASE 
+        WHEN dp.paid IS NULL THEN 'CHURN'
+        WHEN a.status = 'CHURN' THEN 'RESURRECT'
+        ELSE 'EXISTING'
+    END AS new_status
+FROM advertiser_Q84 a
+LEFT JOIN daily_pay_Q84 dp 
+  ON a.user_id = dp.user_id
+ORDER BY a.user_id ASC;
+
+PROMPT =====================
+PROMPT Running QUESTION 85
+PROMPT =====================
+
+SELECT * FROM server_utilization_q85;
+
+WITH ServerSessions AS (
+    SELECT 
+        server_id,
+        session_status,
+        status_time AS start_time,
+        LEAD(status_time) OVER (
+            PARTITION BY server_id 
+            ORDER BY status_time ASC
+        ) AS stop_time
+    FROM server_utilization_Q85
+)
+SELECT 
+    FLOOR(SUM(CAST(stop_time AS DATE) - CAST(start_time AS DATE))) AS total_uptime_days
+FROM ServerSessions
+WHERE session_status = 'start';
+
+PROMPT =====================
+PROMPT Running QUESTION 86
+PROMPT =====================
+
+WITH RankedCards AS (
+    SELECT 
+        card_name,
+        issued_amount,
+        ROW_NUMBER() OVER (
+            PARTITION BY card_name 
+            ORDER BY issue_year ASC, issue_month ASC
+        ) AS rnk
+    FROM monthly_cards_issued_Q86
+)
+SELECT 
+    card_name,
+    issued_amount
+FROM RankedCards
+WHERE rnk = 1
+ORDER BY issued_amount DESC;
+
+PROMPT =====================
+PROMPT Running QUESTION 87
+PROMPT =====================
+
+SELECT * FROM orders_q87;
+
+SELECT * FROM trips_q87;
+
+SELECT * FROM customers_q87;
+
+SELECT o.order_id, t.trip_id, c.customer_id, o.status
+FROM orders_q87 o
+JOIN trips_q87 t ON o.trip_id = t.trip_id 
+JOIN customers_q87 c ON o.customer_id = c.customer_id;
+
+PROMPT =====================
+PROMPT Running QUESTION 88
+PROMPT =====================
+
+
+PROMPT =====================
+PROMPT Running QUESTION 89
+PROMPT =====================
+
+
+PROMPT =====================
+PROMPT Running QUESTION 90
+PROMPT =====================
