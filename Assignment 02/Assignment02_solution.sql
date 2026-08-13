@@ -632,46 +632,219 @@ PROMPT =====================
 PROMPT Running QUESTION 88
 PROMPT =====================
 
-
+SELECT 
+    gender,
+    day,
+    SUM(score_points) OVER (
+        PARTITION BY gender 
+        ORDER BY day ASC
+    ) AS total
+FROM Scores_Q68
+ORDER BY gender ASC, day ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 89
 PROMPT =====================
 
+WITH AllCalls AS (
+    SELECT caller_id AS person_id, duration FROM Calls_Q55
+    UNION ALL
+    SELECT callee_id AS person_id, duration FROM Calls_Q55
+),
+PersonCountry AS (
+    SELECT 
+        p.id AS person_id,
+        c.name AS country_name
+    FROM Person_Q55 p
+    JOIN Country_Q55 c 
+      ON SUBSTR(p.phone_number, 1, 3) = c.country_code
+)
+SELECT 
+    pc.country_name AS country
+FROM AllCalls ac
+JOIN PersonCountry pc 
+  ON ac.person_id = pc.person_id
+GROUP BY pc.country_name
+HAVING AVG(ac.duration) > (SELECT AVG(duration) FROM AllCalls);
 
 PROMPT =====================
 PROMPT Running QUESTION 90
 PROMPT =====================
+
+SELECT * FROM numbers_q90;
+
+WITH numlist AS 
+(
+SELECT num 
+FROM numbers_q90
+CONNECT BY PRIOR num = num
+        AND PRIOR SYS_GUID() IS NOT NULL  
+        AND LEVEL <= frequency
+)
+SELECT ROUND(MEDIAN(num),1) as MEDIAN
+FROM numlist;
 
 
 PROMPT =====================
 PROMPT Running QUESTION 91
 PROMPT =====================
 
+WITH MonthlyDeptAvg AS (
+    SELECT 
+        TO_CHAR(s.pay_date, 'YYYY-MM') AS pay_month,
+        e.department_id,
+        AVG(s.amount) AS dept_avg
+    FROM Salary_Q91 s
+    JOIN Employee_Q91 e 
+      ON s.employee_id = e.employee_id
+    GROUP BY TO_CHAR(s.pay_date, 'YYYY-MM'), e.department_id
+),
+MonthlyCompanyAvg AS (
+    SELECT 
+        TO_CHAR(pay_date, 'YYYY-MM') AS pay_month,
+        AVG(amount) AS comp_avg
+    FROM Salary_Q91
+    GROUP BY TO_CHAR(pay_date, 'YYYY-MM')
+)
+SELECT 
+    d.pay_month,
+    d.department_id,
+    CASE 
+        WHEN d.dept_avg > c.comp_avg THEN 'higher'
+        WHEN d.dept_avg < c.comp_avg THEN 'lower'
+        ELSE 'same'
+    END AS comparison
+FROM MonthlyDeptAvg d
+JOIN MonthlyCompanyAvg c 
+  ON d.pay_month = c.pay_month
+ORDER BY d.pay_month DESC, d.department_id ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 92
 PROMPT =====================
 
+WITH FirstLogins AS (
+    SELECT 
+        player_id,
+        MIN(event_date) AS first_date
+    FROM Activity_Q56
+    GROUP BY player_id
+)
+SELECT 
+    ROUND(
+        COUNT(DISTINCT a.player_id) / COUNT(DISTINCT f.player_id), 
+        2
+    ) AS fraction
+FROM FirstLogins f
+LEFT JOIN Activity_Q56 a 
+  ON f.player_id = a.player_id 
+ AND a.event_date = f.first_date + 1;
 
 PROMPT =====================
 PROMPT Running QUESTION 93
 PROMPT =====================
 
+WITH PlayerScores AS (
+    SELECT first_player AS player_id, first_score AS score FROM Matches_Q93
+    UNION ALL
+    SELECT second_player AS player_id, second_score AS score FROM Matches_Q93
+),
+TotalScores AS (
+    SELECT 
+        p.group_id,
+        p.player_id,
+        NVL(SUM(ps.score), 0) AS total_score,
+        ROW_NUMBER() OVER (
+            PARTITION BY p.group_id 
+            ORDER BY NVL(SUM(ps.score), 0) DESC, p.player_id ASC
+        ) AS rnk
+    FROM Players_Q93 p
+    LEFT JOIN PlayerScores ps 
+      ON p.player_id = ps.player_id
+    GROUP BY p.group_id, p.player_id
+)
+SELECT 
+    group_id,
+    player_id
+FROM TotalScores
+WHERE rnk = 1
+ORDER BY group_id ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 94
 PROMPT =====================
 
+WITH ExamMinMax AS (
+    SELECT 
+        exam_id,
+        MIN(score) AS min_score,
+        MAX(score) AS max_score
+    FROM Exam_Q94
+    GROUP BY exam_id
+),
+LoudStudents AS (
+    SELECT DISTINCT e.student_id
+    FROM Exam_Q94 e
+    JOIN ExamMinMax mm 
+      ON e.exam_id = mm.exam_id
+    WHERE e.score = mm.min_score 
+       OR e.score = mm.max_score
+)
+SELECT DISTINCT 
+    s.student_id,
+    s.student_name
+FROM Student_Q94 s
+JOIN Exam_Q94 e 
+  ON s.student_id = e.student_id
+WHERE s.student_id NOT IN (SELECT student_id FROM LoudStudents)
+ORDER BY s.student_id ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 95
 PROMPT =====================
 
+WITH ExamMinMax AS (
+    SELECT 
+        exam_id,
+        MIN(score) AS min_score,
+        MAX(score) AS max_score
+    FROM Exam_Q94
+    GROUP BY exam_id
+),
+LoudStudents AS (
+    SELECT DISTINCT e.student_id
+    FROM Exam_Q94 e
+    JOIN ExamMinMax mm 
+      ON e.exam_id = mm.exam_id
+    WHERE e.score = mm.min_score 
+       OR e.score = mm.max_score
+)
+SELECT DISTINCT 
+    s.student_id,
+    s.student_name
+FROM Student_Q94 s
+JOIN Exam_Q94 e 
+  ON s.student_id = e.student_id
+WHERE s.student_id NOT IN (SELECT student_id FROM LoudStudents)
+ORDER BY s.student_id ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 96
 PROMPT =====================
+
+SELECT * FROM songs_history_q96;
+SELECT * FROM songs_weekly_q96;
+
+WITH stripped AS 
+( 
+  SELECT user_id, song_id, COUNT(*) as song_count 
+  FROM songs_weekly_q96 
+  WHERE listen_time <= TO_TIMESTAMP('2022-08-04 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+  GROUP BY user_id, song_id
+)
+SELECT s.user_id, s.song_id, SUM(s.count + NVL((SELECT SONG_PLAYS from songs_history_q96 h where h.user_id = s.user_id), 0)
+FROM stripped s;
+
 
 
 PROMPT =====================
