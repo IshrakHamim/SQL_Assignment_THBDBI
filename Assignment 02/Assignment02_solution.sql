@@ -832,36 +832,97 @@ PROMPT =====================
 PROMPT Running QUESTION 96
 PROMPT =====================
 
-SELECT * FROM songs_history_q96;
-SELECT * FROM songs_weekly_q96;
-
-WITH stripped AS 
-( 
-  SELECT user_id, song_id, COUNT(*) as song_count 
-  FROM songs_weekly_q96 
-  WHERE listen_time <= TO_TIMESTAMP('2022-08-04 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
-  GROUP BY user_id, song_id
+WITH stripped AS (
+    SELECT 
+        user_id, 
+        song_id, 
+        COUNT(*) AS song_count
+    FROM songs_weekly_q96
+    WHERE listen_time <= TO_TIMESTAMP('2022-08-04 23:59:59', 'YYYY-MM-DD HH24:MI:SS')
+    GROUP BY user_id, song_id
 )
-SELECT s.user_id, s.song_id, SUM(s.count + NVL((SELECT SONG_PLAYS from songs_history_q96 h where h.user_id = s.user_id), 0)
-FROM stripped s;
-
-
+SELECT 
+    NVL(s.user_id, h.user_id) AS user_id,
+    NVL(s.song_id, h.song_id) AS song_id,
+    NVL(h.song_plays, 0) + NVL(s.song_count, 0) AS song_plays
+FROM stripped s
+FULL OUTER JOIN songs_history_q96 h
+  ON s.user_id = h.user_id 
+ AND s.song_id = h.song_id
+ORDER BY song_plays DESC;
 
 PROMPT =====================
 PROMPT Running QUESTION 97
 PROMPT =====================
 
+SELECT 
+    ROUND(
+        COUNT(CASE WHEN t.signup_action = 'Confirmed' THEN 1 END) / COUNT(DISTINCT e.email_id),
+        2
+    ) AS confirm_rate
+FROM emails_Q97 e
+LEFT JOIN texts_Q97 t 
+  ON e.email_id = t.email_id;
 
 PROMPT =====================
 PROMPT Running QUESTION 98
 PROMPT =====================
 
+WITH DailyTweetCounts AS (
+    SELECT 
+        user_id,
+        tweet_date,
+        COUNT(tweet_id) AS tweet_count
+    FROM tweets_Q98
+    GROUP BY user_id, tweet_date
+)
+SELECT 
+    user_id,
+    tweet_date,
+    ROUND(
+        AVG(tweet_count) OVER (
+            PARTITION BY user_id 
+            ORDER BY tweet_date ASC 
+            ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+        ), 
+        2
+    ) AS rolling_avg_3days
+FROM DailyTweetCounts
+ORDER BY user_id ASC, tweet_date ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 99
 PROMPT =====================
 
+SELECT 
+    b.age_bucket,
+    ROUND(
+        100.0 * SUM(CASE WHEN a.activity_type = 'send' THEN a.time_spent ELSE 0 END) / 
+        SUM(CASE WHEN a.activity_type IN ('send', 'open') THEN a.time_spent ELSE 0 END),
+        2
+    ) AS send_perc,
+    ROUND(
+        100.0 * SUM(CASE WHEN a.activity_type = 'open' THEN a.time_spent ELSE 0 END) / 
+        SUM(CASE WHEN a.activity_type IN ('send', 'open') THEN a.time_spent ELSE 0 END),
+        2
+    ) AS open_perc
+FROM activities_Q99 a
+JOIN age_breakdown_Q99 b 
+  ON a.user_id = b.user_id
+WHERE a.activity_type IN ('send', 'open')
+GROUP BY b.age_bucket
+ORDER BY b.age_bucket ASC;
 
 PROMPT =====================
 PROMPT Running QUESTION 100
 PROMPT =====================
+
+SELECT p.profile_id
+FROM personal_profiles_Q100 p
+JOIN employee_company_Q100 ec 
+  ON p.profile_id = ec.personal_profile_id
+JOIN company_pages_Q100 c 
+  ON ec.company_id = c.company_id
+GROUP BY p.profile_id, p.followers
+HAVING p.followers > MAX(c.followers)
+ORDER BY p.profile_id ASC;
