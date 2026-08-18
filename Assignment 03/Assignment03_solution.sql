@@ -369,3 +369,17 @@ PROMPT =====================
 PROMPT Running QUESTION 132
 PROMPT =====================
 
+SELECT * from prod7.client;
+
+SELECT * from prod7.client_detail;
+
+SELECT * from prod7.client_oversight;
+
+SELECT * from prod7.program;
+
+SELECT * from prod7.program_client;
+
+SELECT * from prod7.program_client_history;
+
+
+
